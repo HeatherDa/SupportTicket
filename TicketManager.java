@@ -1,14 +1,17 @@
 package com.Heather;
 
+import java.io.IOException;
 import java.util.*;
 
 public class TicketManager {
 
-    public static void main(String[] args) {
-        LinkedList<Ticket> ticketQueue = new LinkedList<Ticket>();
-        ArrayList<resolvedTicket>resolvedTickets=new ArrayList<>();
+    public static void main(String[] args) throws IOException {
+        LinkedList<Ticket> ticketQueue = new LinkedList<>();
         Scanner scan = new Scanner(System.in);
-
+        LinkedList<Ticket> testin=TicketFileManager.read("TicketQ.txt");
+        if(!testin.isEmpty()){
+            ticketQueue=testin;
+        }
 
         while(true){
 
@@ -22,7 +25,7 @@ public class TicketManager {
             } else if (task == 2) {
                 //delete a ticket by ID
                 resolvedTicket r=deleteTicket(ticketQueue);
-                resolvedTickets.add(r);
+                resolvedTicket.setResolvedTickets(r);
 
             } else if (task==3){
                 //delete a ticket by Issue
@@ -33,7 +36,7 @@ public class TicketManager {
                     System.out.println(n);
                 }
                 resolvedTicket r=deleteTicket(ticketQueue);
-                resolvedTickets.add(r);
+                resolvedTicket.setResolvedTickets(r);
 
             } else if (task==4){
                 //search by Name
@@ -47,11 +50,7 @@ public class TicketManager {
             } else if ( task == 6 ) {
                 //Quit. Future prototype may want to save all tickets to a file
                 System.out.println("Quitting program");
-                String date=(String.valueOf(new Date())).replaceAll(" ","_");
-                String filename="Resolved_tickets_as_of_"+date;
-                /*TicketFileManager today=new TicketFileManager(filename);
-                write(filename);
-                read(filename);*/
+                TicketFileManager.writeFiles(ticketQueue);
                 break;
             }
             else {
@@ -77,7 +76,7 @@ public class TicketManager {
 
     }
 
-    protected static resolvedTicket deleteTicket(LinkedList<Ticket> ticketQueue) {
+    protected static resolvedTicket deleteTicket(LinkedList<Ticket> ticketQueue) {//NOT WORKING
         printAllTickets(ticketQueue);   //display list for user
         resolvedTicket t = null;
 
@@ -94,19 +93,17 @@ public class TicketManager {
         boolean found = false;
 
         for (Ticket ticket : ticketQueue) {
-            int adjustedID=deleteID-1;//this is a quick and dirty solution, but I can't find the source of the actual problem (ID num entered 1 larger than actual ID num)
-            if (ticket.getTicketID() == adjustedID) {
+            if (ticket.getTicketID() == deleteID) {
                 found = true;
-                System.out.println();
                 System.out.println("Describe ticket resolution");
                 String resolved= scanr.nextLine();
-                t=new resolvedTicket(ticket.getDescription(), ticket.getPriority(), ticket.getReporter(), ticket.getDateReported(),(new Date()), resolved);
+                t=new resolvedTicket(ticket.getTicketID(), ticket.getDescription(), ticket.getPriority(), ticket.getReporter(), ticket.getDateReported(),(new Date()), resolved);
                 ticketQueue.remove(ticket);
                 System.out.println(String.format("Ticket %d deleted", deleteID));
                 break; //don't need loop any more.
             }
         }
-        if (found == false) {
+        if (!found) {
             System.out.println("Ticket ID not found, no ticket deleted");
             //TODO – re-write this method to ask for ID again if not found
         }
@@ -124,8 +121,10 @@ public class TicketManager {
         while (moreProblems){
             System.out.println("Enter problem");
             description = sc.nextLine();
+            description = description.toLowerCase();
             System.out.println("Who reported this issue?");
             reporter = sc.nextLine();
+            reporter = reporter.toLowerCase();
             System.out.println("Enter priority of " + description);
             priority = Integer.parseInt(sc.nextLine());
 
@@ -173,17 +172,24 @@ public class TicketManager {
 
     public static ArrayList<Ticket>search( String criteria, LinkedList<Ticket> ticketQueue ){
         ArrayList<Ticket>results=new ArrayList<>();
+        criteria=criteria.toLowerCase();
         for (Ticket t:ticketQueue){
-            if(t.getDescription().contains(criteria)){
-                results.add(t);
-            }else if (t.getTicketID()==Integer.parseInt(criteria)){
-                results.add(t);
+            try{
+                if(t.getDescription().contains(criteria)){
+                    results.add(t);
+                }else if (t.getReporter().contains(criteria)){
+                    results.add(t);
+                }
+                else if (t.getTicketID()==Integer.parseInt(criteria)) {
+                    results.add(t);
+                }
+            }catch(NumberFormatException ne){
+                if(results.size()==0) {
+                    System.out.println("There is no ticket containing this criteria.");
+                }
             }
         }
 
         return results;
-    }
-    public static void resolveTicket(){
-
     }
 }

@@ -1,15 +1,15 @@
 package com.Heather;
 
+
 import java.util.*;
 
-/**
- * Created by cryst on 3/24/2016.
- */
+
 public class Ticket {
     private int priority;
     private String reporter; //Stores person or department who reported issue
     private String description;
     private Date dateReported;
+    private static ArrayList<Ticket>TicketQueue=new ArrayList<>();
 
 
     //STATIC Counter - accessible to all Ticket objects.
@@ -33,8 +33,8 @@ public class Ticket {
     }
 
     public String toString(){
-        return("ID= " + this.ticketID + " Issued: " + this.description + " Priority: " + this.priority + " Reported by: "
-                + this.reporter + " Reported on: " + this.dateReported);
+        return("ID: " + this.ticketID + ", Issued: " + this.description + ", Priority: " + this.priority + ", Reported by: "
+                + this.reporter + ", Reported on: " + this.dateReported+",\n");
     }
 
     public Date getDateReported() {
@@ -46,7 +46,7 @@ public class Ticket {
     }
 
     public int getTicketID() {
-        return 0;
+        return this.ticketID;
     }
 
     public String getReporter() {
